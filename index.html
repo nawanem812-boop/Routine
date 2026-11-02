@@ -521,11 +521,11 @@ html[data-theme=bulles] body::before{content:"";position:fixed;inset:0;pointer-e
 <script>
 const $=s=>document.querySelector(s),pad=n=>String(n).padStart(2,'0'),K='routine:v1',LK=['courses','td','stages','qcm'];
 const esc=s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
-const DEF={mode:'auto',retard:'auto',wake:'06:15',bed:'23:00',cs:'08:15',ce:'17:45',ss:'07:00',se:'16:00',ex:'2027-01-20,2027-01-25,2027-01-28,2027-01-29,2027-02-05',sport:['maison','salle','maison','','salle','salle',''],done:{},skip:{},pmDone:{},pm:null,pmDate:'',lastExp:''};
+const DEF={mode:'auto',retard:'auto',wake:'06:15',bed:'23:00',cs:'08:15',ce:'17:45',ss:'07:00',se:'16:00',ex:'2027-01-20,2027-01-25,2027-01-28,2027-01-29,2027-02-05',sport:['maison','salle','maison','','salle','salle',''],done:{},skip:{},pmDone:{},pm:null,pmDate:'',lastExp:'',nt:{on:false,lead:0,topic:'',sent:{}}};
 let S=JSON.parse(JSON.stringify(DEF));
 try{Object.assign(S,JSON.parse(localStorage.getItem(K)||'{}'))}catch(e){}
 try{navigator.storage&&navigator.storage.persist&&navigator.storage.persist()}catch(e){}
-const sv=()=>{try{localStorage.setItem(K,JSON.stringify(S))}catch(e){}};
+const sv=()=>{try{localStorage.setItem(K,JSON.stringify(S))}catch(e){}try{ntLocal()}catch(e){}};
 const iso=d=>d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate()),fr=s=>{const a=s.split('-');return new Date(+a[0],a[1]-1,+a[2],12)},ad=(d,n)=>{const r=new Date(d);r.setDate(r.getDate()+n);return r},mn=t=>{const a=String(t).split(':');return+a[0]*60+ +a[1]},hm=m=>pad(Math.floor(m/60))+':'+pad(Math.round(m%60));
 const DN=['Lun','Mar','Mer','Jeu','Ven','Sam','Dim'],fd=d=>DN[(d.getDay()+6)%7]+' '+d.getDate()+'/'+pad(d.getMonth()+1);
 const T0=new Date();T0.setHours(12,0,0,0);let cur=new Date(T0),tab='t';
@@ -620,11 +620,24 @@ return`<div class="dash-card"><div class="dash-label">💾 Sauvegarde</div>
 <input type="file" id="fi" accept=".json,application/json" style="display:none"><textarea id="ta" class="rin" style="height:80px;margin-top:8px" placeholder="Le texte exporté apparaît ici (copie-le si le téléchargement ne marche pas). Pour importer : colle un export ici puis touche Importer, ou choisis un fichier."></textarea>
 <button class="add-btn" style="width:100%;margin-top:8px;background:var(--brick)" data-a="impall">Restaurer tout (écrase aussi Programme Major sur ce site)</button>
 <p class="plan-note" id="st">Dernier export : ${S.lastExp||'jamais'}. Sur le même site que Programme Major, l’export contient les deux applis et se réimporte aussi dans Programme Major. Importer ici ne touche que la routine ; « Restaurer tout » remet aussi tes cours, TD, stages et QCM.</p></div>
-<div class="dash-card"><div class="dash-label">Horaires</div><div class="row2">${I('wake','Réveil')}${I('bed','Coucher')}${I('cs','Départ pour les cours')}${I('ce','Retour des cours')}${I('ss','Début de stage')}${I('se','Fin de stage')}</div><p class="plan-note">Les horaires d’un stage saisis dans Programme Major priment (ex. « 7h-15h30 »).</p></div>
+${ntCard()}<div class="dash-card"><div class="dash-label">Horaires</div><div class="row2">${I('wake','Réveil')}${I('bed','Coucher')}${I('cs','Départ pour les cours')}${I('ce','Retour des cours')}${I('ss','Début de stage')}${I('se','Fin de stage')}</div><p class="plan-note">Les horaires d’un stage saisis dans Programme Major priment (ex. « 7h-15h30 »).</p></div>
 <div class="dash-card"><div class="dash-label">Dates d’épreuves</div><input class="rin" type="text" data-a="set" data-k="ex" value="${esc(S.ex)}"><p class="plan-note">AAAA-MM-JJ, séparées par des virgules. Le mode Examens s’active 21 jours avant la prochaine.</p></div>
 <div class="dash-card"><div class="dash-label">Sport par jour</div><div class="row2">${DN.map((n,i)=>`<label>${n}<select class="rin" data-a="sport" data-i="${i}">${[['','Repos'],['salle','Salle'],['maison','Maison / pilates']].map(([v,l])=>`<option value="${v}" ${S.sport[i]==v?'selected':''}>${l}</option>`).join('')}</select></label>`).join('')}</div></div>
 <p class="plan-note">Change de DA avec le bouton rond (tap = suivante, appui long = menu). Le choix est partagé avec Programme Major.</p>`}
 function R(){$('#tabs').innerHTML=[['t','Aujourd’hui'],['w','Semaine'],['p','Programme'],['h','Suivi'],['r','Réglages']].map(([k,l])=>`<div class="tab ${tab==k?'active':''}" data-a="tab" data-v="${k}">${l}</div>`).join('');$('#v').innerHTML={t:vt,w:vw,p:vp,h:vh,r:vr}[tab]();$('#dt').value=iso(cur);const n=nextEx(T0);$('#nx').value=n===null?'—':'J−'+n}
+/* ---- notifications ---- */
+var tm=[];const tdy=()=>{const d=new Date();d.setHours(12,0,0,0);return d};
+const ntItems=d=>{const k=iso(d),dn=S.done[k]||{};return plan(d).bl.filter(x=>x.s<1e4&&!dn[x.id]).map(x=>({at:new Date(d.getFullYear(),d.getMonth(),d.getDate(),0,x.s-(+S.nt.lead||0)).getTime(),t:x.l,b:hm(x.s)+(x.du?' · '+x.du+' min':''),id:k+x.id}))};
+function ntShow(i){const o={body:i.b,tag:i.id,icon:'icon-192.png',badge:'icon-192.png'};navigator.serviceWorker?navigator.serviceWorker.ready.then(r=>r.showNotification(i.t,o)).catch(()=>{}):0}
+function ntLocal(){tm.forEach(clearTimeout);tm=[];if(S.nt.topic||!S.nt.on||!('Notification' in window)||Notification.permission!=='granted')return;const now=Date.now();[0,1].forEach(j=>ntItems(ad(tdy(),j)).forEach(i=>{const w=i.at-now;if(w>0&&w<1.5*864e5)tm.push(setTimeout(()=>ntShow(i),w))}))}
+const ntSend=(i,dl)=>fetch('https://ntfy.sh',{method:'POST',body:JSON.stringify(Object.assign({topic:S.nt.topic.trim(),title:i.t,message:i.b,tags:['alarm_clock']},dl?{delay:String(Math.floor(i.at/1000))}:{}))}).then(r=>{if(!r.ok)throw 0});
+async function ntPush(){if(!(S.nt.topic||'').trim())return'Renseigne d’abord un sujet ntfy.';const now=Date.now();let n=0;S.nt.sent=S.nt.sent||{};Object.keys(S.nt.sent).forEach(k=>{if(S.nt.sent[k]<now)delete S.nt.sent[k]});
+try{for(const j of[0,1])for(const i of ntItems(ad(tdy(),j))){const key=i.id+':'+i.at;if(i.at<=now+15000||S.nt.sent[key])continue;await ntSend(i,true);S.nt.sent[key]=i.at;n++}}catch(e){sv();return'Envoi impossible (connexion ou sujet invalide).'}sv();return n+' rappel(s) programmé(s) pour aujourd’hui et demain.'}
+function ntCard(){const ok='Notification' in window;return`<div class="dash-card"><div class="dash-label">🔔 Notifications</div><button class="add-btn" style="width:100%" data-a="ntOn">Activer les rappels sur cet appareil</button>
+<div class="row2"><label>Prévenir<select class="rin" data-a="ntlead">${[0,5,10,15,30].map(v=>`<option value="${v}" ${+S.nt.lead==v?'selected':''}>${v?v+' min avant':'À l’heure du bloc'}</option>`).join('')}</select></label></div>
+<label style="display:block;margin-top:8px">Sujet ntfy (rappels fiables, appli fermée)<input class="rin" type="text" data-a="nttopic" value="${esc(S.nt.topic)}" placeholder="ex. routine-naw-k4x9q2"></label>
+<div style="display:flex;gap:8px;margin-top:8px"><button class="add-btn" style="flex:1" data-a="ntpush">Programmer 2 jours</button><button class="add-btn" style="flex:1;background:var(--ink)" data-a="nttest">Tester</button></div>
+<p class="plan-note" id="ntst">${ok?'Autorisation : '+Notification.permission+'. ':''}Un rappel par bloc de la journée (prières, skincare, révisions, sport…), sauf ceux déjà cochés. Sans ntfy, un navigateur ne peut sonner que si la routine est ouverte ou récemment active. Avec ntfy (gratuit) : installe l’appli ntfy, abonne-toi au même sujet (choisis un nom long et secret, il sert de mot de passe) : les rappels sont alors programmés sur ntfy.sh et arrivent même téléphone verrouillé. Les titres des blocs transitent par ntfy.sh. Ouvre la routine chaque jour ou après un gros changement de plan pour reprogrammer.</p></div>`}
 /* ---- sauvegarde ---- */
 function dump(){const o={};try{if(live())for(let i=0;i<localStorage.length;i++){const k=localStorage.key(i);o[k]=localStorage.getItem(k)}}catch(e){}o[K]=JSON.stringify(S);return o}
 function dl(t,n){try{const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([t],{type:'application/json'}));a.download=n;document.body.appendChild(a);a.click();a.remove()}catch(e){}}
@@ -636,14 +649,18 @@ document.addEventListener('click',e=>{const t=e.target.closest('[data-a]');if(!t
 if(a=='exp'){const o=JSON.stringify(dump());dl(o,'routine-major-'+iso(T0)+'.json');$('#ta').value=o;S.lastExp=iso(T0);sv();$('#st').textContent='Exporté le '+S.lastExp+'. Garde le fichier dans un endroit sûr (cloud, mail).';return}
 if(a=='imp'){const x=$('#ta').value.trim();if(x)imp(x,false);else $('#fi').onchange=()=>{const f=$('#fi').files[0];if(f)f.text().then(s=>imp(s,false))},$('#fi').click();return}
 if(a=='impall'){const x=$('#ta').value.trim();if(x)imp(x,true);else $('#fi').onchange=()=>{const f=$('#fi').files[0];if(f)f.text().then(s=>imp(s,true))},$('#fi').click();return}
+if(a=='ntOn'){S.nt.on=true;sv();const st=$('#ntst');if(!('Notification' in window)){st.textContent='Notifications indisponibles dans ce navigateur : utilise ntfy.';return}Notification.requestPermission().then(p=>{st.textContent=p=='granted'?'Rappels activés.':'Permission refusée : autorise les notifications dans les réglages du navigateur.';ntLocal()});return}
+if(a=='ntpush'){$('#ntst').textContent='Envoi…';ntPush().then(m=>{$('#ntst').textContent=m});return}
+if(a=='nttest'){const i={t:'Routine Major',b:'Test : les rappels fonctionnent ✅',id:'test'+Date.now(),at:Date.now()};if(S.nt.topic)ntSend(i,false).catch(()=>{});else ntShow(i);$('#ntst').textContent='Test envoyé.';return}
 if(a=='copyrev'){try{navigator.clipboard.writeText(revW().join('\n'))}catch(e){}t.textContent='Copié ✓';return}
 if(a=='tab')tab=D.v;else if(a=='nav')cur=ad(cur,+D.n);else if(a=='go'){cur=fr(D.d);if(tab!='w'||true)tab='t'}else if(a=='mode')S.mode=D.v;
 else if(a=='skip'){const l=S.skip[k]||[];S.skip[k]=l.includes(D.id)?l.filter(x=>x!=D.id):[...l,D.id]}
 else if(a=='chk'){const id=D.id,dn=(S.done[k]=S.done[k]||{}),v=!dn[id];if(/^(c|td):/.test(id)){const x=plan(cur).bl.find(b=>b.id==id),L=(S.pmDone[k]||[]).filter(y=>y.id!=id);tickPM(id,v);if(v)L.push({id,l:x?x.l:id,du:x?x.du:0});S.pmDone[k]=L}dn[id]=v}else return;
 sv();R()});
-document.addEventListener('change',e=>{const t=e.target,a=t.dataset.a,D=t.dataset;if(t.id=='dt'){if(t.value){cur=fr(t.value);tab='t'}R();return}if(a=='ret')S.retard=t.value;else if(a=='set')S[D.k]=t.value;else if(a=='sport')S.sport[+D.i]=t.value;else return;sv();R()});
+document.addEventListener('change',e=>{const t=e.target,a=t.dataset.a,D=t.dataset;if(t.id=='dt'){if(t.value){cur=fr(t.value);tab='t'}R();return}if(a=='ret')S.retard=t.value;else if(a=='set')S[D.k]=t.value;else if(a=='sport')S.sport[+D.i]=t.value;else if(a=='ntlead'){S.nt.lead=+t.value;S.nt.sent={}}else if(a=='nttopic')S.nt.topic=t.value.trim();else return;sv();R()});
 R();
 
+try{ntLocal();if(S.nt.topic)ntPush()}catch(e){}
 if("serviceWorker" in navigator){window.addEventListener("load",()=>{navigator.serviceWorker.register("./service-worker.js").catch(()=>{})})}
 </script>
 <button id="daBtn" type="button" aria-label="Changer de DA (appui long : menu)"><b id="daIc"></b></button>

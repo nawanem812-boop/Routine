@@ -1,8 +1,1 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
-<rect width="512" height="512" rx="112" fill="#F7D3E3"/>
-<rect x="72" y="72" width="368" height="368" rx="82" fill="#C8407F"/>
-<path d="M150 170h212M150 256h212M150 342h132" stroke="#fff" stroke-width="28" stroke-linecap="round"/>
-<circle cx="116" cy="170" r="10" fill="#fff"/>
-<circle cx="116" cy="256" r="10" fill="#fff"/>
-<circle cx="116" cy="342" r="10" fill="#fff"/>
-</svg>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#EC6FA5"/><stop offset="1" stop-color="#A32C63"/></linearGradient></defs><rect width="512" height="512" fill="url(#g)"/><circle cx="256.0" cy="66.0" r="12" fill="#fff"/><circle cx="351.0" cy="91.5" r="8" fill="#fff"/><circle cx="420.5" cy="161.0" r="8" fill="#fff"/><circle cx="446.0" cy="256.0" r="12" fill="#fff"/><circle cx="420.5" cy="351.0" r="8" fill="#fff"/><circle cx="351.0" cy="420.5" r="8" fill="#fff"/><circle cx="256.0" cy="446.0" r="12" fill="#fff"/><circle cx="161.0" cy="420.5" r="8" fill="#fff"/><circle cx="91.5" cy="351.0" r="8" fill="#fff"/><circle cx="66.0" cy="256.0" r="12" fill="#fff"/><circle cx="91.5" cy="161.0" r="8" fill="#fff"/><circle cx="161.0" cy="91.5" r="8" fill="#fff"/><circle cx="256" cy="256" r="140" fill="#FFF8FC"/><path d="M196 262L240 306L322 212" fill="none" stroke="#C8407F" stroke-width="30" stroke-linecap="round" stroke-linejoin="round"/></svg>

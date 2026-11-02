@@ -32,3 +32,9 @@ NOUVEAUTÉS v2 (d'après ton export Major de promo)
 - Suivi > Revue du dimanche : bilan de la semaine (révisions, TD, journal, sommeil, dépenses, retard) avec bouton Copier.
 - Importer une sauvegarde sur une autre adresse récupère aussi sommeil et dépenses de LIFE-PROJECT-.
 Remplace index.html ET service-worker.js dans le dépôt.
+
+NOTIFICATIONS (v3) + NOUVELLE ICÔNE
+- Réglages > Notifications : « Activer les rappels », choix de l'avance (à l'heure, 5, 10, 15, 30 min), sujet ntfy, « Programmer 2 jours », « Tester ».
+- Sans ntfy : rappels locaux, seulement si la routine est ouverte ou récemment active (limite des navigateurs).
+- Avec ntfy : installe l'appli ntfy, abonne-toi au même sujet (nom long et secret). La routine programme chaque bloc non coché pour aujourd'hui et demain, et se reprogramme à chaque ouverture.
+- Remplace TOUS les fichiers du dépôt (icônes comprises). Pour voir la nouvelle icône sur l'écran d'accueil, désinstalle puis réinstalle l'appli (tes données restent dans Chrome).
